@@ -1,0 +1,19 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+module smooth_sigmoid(vdd, vss, a, b);
+inout vdd, vss, a, b;
+electrical vdd, vss, a, b;
+
+real threshold;
+real exp_scaled_a;
+real sigmoid;
+
+analog begin
+   threshold = (V(vdd)+V(vss))/2;
+   exp_scaled_a = exp(12*(V(a)-threshold));
+   sigmoid = exp_scaled_a/(1+exp_scaled_a);
+   V(b) <+ (V(vdd)*sigmoid); 
+end
+
+endmodule

@@ -1,0 +1,57 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+module count_clock_pulses_limexp(vdd,vss,thresh,clk,out0, out1, out2, out3,c,lc,o00);
+  inout      vdd,vss,thresh,clk,out0, out1, out2, out3,c,lc,o00;
+  electrical vdd,vss,thresh,clk,out0, out1, out2, out3,c,lc,o00;
+  
+  integer count, mod_count;
+  integer low_count;
+  real current_time;
+  
+  integer o0, o1, o2, o3;
+  electrical voi0, voi1, voi2, voi3;
+  
+  analog begin
+    current_time = $abstime * 1000;
+    if (current_time == 0)
+      begin
+        count = 0;
+        low_count = 0;
+      end
+    else
+      begin
+        if (V(clk) < V(thresh))
+          begin
+            count = count;
+            low_count = count+1;
+          end
+        else
+          begin
+            if (V(clk) > 1.5*V(thresh)) // Seems to need some hysteresis
+              count = low_count;
+            else
+              count = count;
+            low_count = low_count;
+          end
+      end
+    
+    o0 = count%2;
+    o1 = (count / 2)%2;
+    o2 = (count / 4)%2;
+    o3 = (count / 8)%2;
+    
+    V(voi0) <+ ln(limexp(V(vdd)*o0));
+    V(voi1) <+ ln(limexp(V(vdd)*o1));
+    V(voi2) <+ ln(limexp(V(vdd)*o2));
+    V(voi3) <+ ln(limexp(V(vdd)*o3));
+    I(out0,voi0) <+ ln(limexp(V(out0,voi0)/1.0));
+    I(out1,voi1) <+ ln(limexp(V(out1,voi1)/1.0));
+    I(out2,voi2) <+ ln(limexp(V(out2,voi2)/1.0));
+    I(out3,voi3) <+ ln(limexp(V(out3,voi3)/1.0));
+    V(c) <+ V(vdd)*count;
+    V(lc) <+ V(vdd)*low_count;
+    V(o00) <+ V(vdd)*o0;
+  end
+ 
+endmodule

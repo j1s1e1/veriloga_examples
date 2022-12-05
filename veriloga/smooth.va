@@ -1,0 +1,12 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+module smooth(vdd, vss, a, b);
+inout vdd, vss, a, b;
+electrical vdd, vss, a, b;
+
+analog begin
+   V(b) <+ V(vdd)*(tanh(8*V(a)-4)/2+0.5); 
+end
+
+endmodule
